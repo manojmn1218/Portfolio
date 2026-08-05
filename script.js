@@ -303,33 +303,58 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========== CONTACT FORM ==========
   const contactForm = document.getElementById('contact-form');
 
-  contactForm.addEventListener('submit', (e) => {
+  contactForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const submitBtn = contactForm.querySelector('.btn-submit');
     const originalText = submitBtn.innerHTML;
 
-    // Simulate sending
+    // Show loading state
     submitBtn.innerHTML = `
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       Sending...
     `;
     submitBtn.disabled = true;
 
-    setTimeout(() => {
-      submitBtn.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        Message Sent!
-      `;
-      submitBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+    const formData = new FormData(contactForm);
+    const data = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      message: formData.get('message'),
+      _subject: `New Portfolio Message from ${formData.get('name')}`,
+      _captcha: 'false'
+    };
 
+    try {
+      const response = await fetch('https://formsubmit.co/ajax/manojmn1218@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        submitBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Message Sent!
+        `;
+        submitBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+        contactForm.reset();
+      } else {
+        throw new Error('Form response not ok');
+      }
+    } catch (err) {
+      submitBtn.innerHTML = `Failed to send. Try again!`;
+      submitBtn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+    } finally {
       setTimeout(() => {
         submitBtn.innerHTML = originalText;
         submitBtn.style.background = '';
         submitBtn.disabled = false;
-        contactForm.reset();
-      }, 2500);
-    }, 1500);
+      }, 3500);
+    }
   });
 
 
