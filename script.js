@@ -335,15 +335,20 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify(data)
       });
 
-      if (response.ok) {
+      const result = await response.json();
+
+      if (response.ok && (result.success === "true" || result.success === true)) {
         submitBtn.innerHTML = `
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           Message Sent!
         `;
         submitBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
         contactForm.reset();
+      } else if (result.message && result.message.includes('Activation')) {
+        submitBtn.innerHTML = `Check your email to activate!`;
+        submitBtn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
       } else {
-        throw new Error('Form response not ok');
+        throw new Error(result.message || 'Form response not ok');
       }
     } catch (err) {
       submitBtn.innerHTML = `Failed to send. Try again!`;
