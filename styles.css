@@ -1082,11 +1082,16 @@ button {
 
 .major-certs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   gap: var(--gap-xl);
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .cert-card {
+  max-width: 420px;
+  margin: 0 auto;
+  width: 100%;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--bg-secondary);
@@ -1216,48 +1221,97 @@ button {
 
 .other-certs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: var(--gap-lg);
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .other-cert-card {
-  padding: 1.5rem;
   border-radius: var(--radius-md);
-  background: var(--glass);
+  overflow: hidden;
+  background: var(--bg-secondary);
   border: 1px solid var(--glass-border);
   display: flex;
-  gap: var(--gap-md);
+  flex-direction: column;
   transition: all var(--transition-smooth);
+  max-width: 300px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .other-cert-card:hover {
-  border-color: rgba(108, 99, 255, 0.2);
-  background: var(--glass-hover);
-  transform: translateY(-4px);
+  border-color: rgba(108, 99, 255, 0.25);
+  transform: translateY(-6px);
   box-shadow: var(--shadow-glow);
 }
 
-.other-cert-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
-  background: var(--gradient-subtle);
+.other-cert-image {
+  position: relative;
+  aspect-ratio: 16/10;
+  overflow: hidden;
+  background: #111;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.other-cert-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-smooth);
+}
+
+.other-cert-card:hover .other-cert-image img {
+  transform: scale(1.05);
+}
+
+.other-cert-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity var(--transition-smooth);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  padding: 1rem;
 }
 
-.other-cert-icon svg {
-  width: 20px;
-  height: 20px;
-  color: var(--accent-1);
+.other-cert-card:hover .other-cert-overlay {
+  opacity: 1;
+}
+
+.btn-other-cert-view {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: 0.5rem 1.2rem;
+  border-radius: var(--radius-full);
+  background: var(--gradient-primary);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.btn-other-cert-view:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(108, 99, 255, 0.4);
+}
+
+.btn-other-cert-view svg {
+  width: 12px;
+  height: 12px;
 }
 
 .other-cert-details {
+  padding: 1.2rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   flex-grow: 1;
 }
 
@@ -1267,13 +1321,16 @@ button {
   font-weight: 600;
   color: var(--text-primary);
   line-height: 1.4;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .other-cert-issuer {
   font-size: var(--fs-xs);
-  color: var(--text-muted);
-  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.25rem;
 }
 
 .other-cert-meta {
@@ -1282,30 +1339,19 @@ button {
   align-items: center;
   font-size: var(--fs-xs);
   color: var(--text-muted);
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
-  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 0.75rem;
+  margin-top: auto;
 }
 
 .other-cert-link {
-  color: var(--accent-2);
+  color: var(--accent-1);
   font-weight: 500;
   transition: color var(--transition-fast);
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
 }
 
 .other-cert-link:hover {
-  color: var(--accent-1);
-}
-
-.other-cert-link::after {
-  content: '→';
-  transition: transform var(--transition-fast);
-}
-
-.other-cert-link:hover::after {
-  transform: translateX(2px);
+  color: var(--accent-2);
 }
 
 /* ---------- CONTACT SECTION ---------- */
