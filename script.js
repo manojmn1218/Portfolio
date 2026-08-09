@@ -363,8 +363,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  // ========== MAGNETIC HOVER EFFECT ON PROJECT CARDS ==========
-  projectCards.forEach(card => {
+  // ========== MAGNETIC HOVER EFFECT ON CARDS ==========
+  const hoverCards = document.querySelectorAll('.project-card, .cert-card');
+  hoverCards.forEach(card => {
     card.addEventListener('mousemove', (e) => {
       const rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left;
