@@ -1261,6 +1261,47 @@ button {
   transition: transform var(--transition-smooth);
 }
 
+.css-only-cert {
+  background: linear-gradient(135deg, #10101b 0%, #171728 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+
+.cert-badge-glowing {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(108, 99, 255, 0.08);
+  border: 1.5px dashed rgba(108, 99, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 15px rgba(108, 99, 255, 0.15);
+  z-index: 1;
+}
+
+.cert-badge-glowing svg {
+  width: 28px;
+  height: 28px;
+  color: var(--accent-2);
+  filter: drop-shadow(0 0 6px var(--accent-2));
+}
+
+.cert-watermark {
+  position: absolute;
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.015);
+  font-family: var(--font-heading);
+  pointer-events: none;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+}
+
 .other-cert-card:hover .other-cert-image img {
   transform: scale(1.05);
 }
