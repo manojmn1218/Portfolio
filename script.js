@@ -1,409 +1,510 @@
-/* ============================================
-   MANOJ PORTFOLIO — Interactivity & Animations
-   ============================================ */
+/* ==========================================================================
+   MANOJ PORTFOLIO — INTERACTIVE ENGINE
+   High-Fidelity Animations, Fluid Canvas, Spotlight Effects & Lightbox
+   ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ========== PARTICLE CANVAS ==========
+  // ========== 1. SCROLL PROGRESS INDICATOR ==========
+  const progressBar = document.getElementById('scroll-progress');
+  function updateScrollProgress() {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    if (docHeight > 0) {
+      const scrolled = (scrollTop / docHeight) * 100;
+      if (progressBar) progressBar.style.width = `${scrolled}%`;
+    }
+  }
+  window.addEventListener('scroll', updateScrollProgress, { passive: true });
+
+  // ========== 2. FLOATING NAVBAR SCROLL BEHAVIOR ==========
+  const navbar = document.getElementById('navbar');
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  function handleNavbarScroll() {
+    const scrollY = window.scrollY;
+    if (navbar) {
+      if (scrollY > 40) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    }
+
+    // Active Section Tracking
+    let currentSectionId = '';
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop - 150;
+      const sectionHeight = section.offsetHeight;
+      if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+        currentSectionId = section.getAttribute('id');
+      }
+    });
+
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('data-section') === currentSectionId) {
+        link.classList.add('active');
+      }
+    });
+  }
+  window.addEventListener('scroll', handleNavbarScroll, { passive: true });
+
+  // Mobile Menu Toggle
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  if (hamburger && mobileMenu) {
+    hamburger.addEventListener('click', () => {
+      mobileMenu.classList.toggle('active');
+      document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+    });
+
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.remove('active');
+        document.body.style.overflow = '';
+      });
+    });
+  }
+
+  // ========== 3. FLUID AURORA CANVAS REACTOR ==========
   const canvas = document.getElementById('hero-canvas');
-  const ctx = canvas.getContext('2d');
-  let particles = [];
-  let animationFrameId;
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+    let mouse = { x: null, y: null, radius: 140 };
 
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
 
-  class Particle {
-    constructor() {
-      this.reset();
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      initParticles();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    window.addEventListener('mouseleave', () => {
+      mouse.x = null;
+      mouse.y = null;
+    });
+
+    class AuroraParticle {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.vx = (Math.random() - 0.5) * 0.55;
+        this.vy = (Math.random() - 0.5) * 0.55;
+        this.size = Math.random() * 2.5 + 1;
+        this.colorType = Math.random();
+        this.baseAlpha = Math.random() * 0.4 + 0.15;
+        this.alpha = this.baseAlpha;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.x < 0) this.x = width;
+        if (this.x > width) this.x = 0;
+        if (this.y < 0) this.y = height;
+        if (this.y > height) this.y = 0;
+
+        // Interaction with mouse
+        if (mouse.x !== null) {
+          const dx = mouse.x - this.x;
+          const dy = mouse.y - this.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < mouse.radius) {
+            const force = (mouse.radius - dist) / mouse.radius;
+            this.x -= (dx / dist) * force * 3;
+            this.y -= (dy / dist) * force * 3;
+            this.alpha = Math.min(this.baseAlpha + 0.35, 0.9);
+          } else {
+            this.alpha = this.baseAlpha;
+          }
+        }
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        if (this.colorType < 0.5) {
+          ctx.fillStyle = `rgba(0, 242, 254, ${this.alpha})`; // Cyan
+        } else if (this.colorType < 0.85) {
+          ctx.fillStyle = `rgba(138, 43, 226, ${this.alpha})`; // Violet
+        } else {
+          ctx.fillStyle = `rgba(0, 245, 160, ${this.alpha})`; // Mint
+        }
+        ctx.fill();
+      }
     }
 
-    reset() {
-      this.x = Math.random() * canvas.width;
-      this.y = Math.random() * canvas.height;
-      this.size = Math.random() * 2 + 0.5;
-      this.speedX = (Math.random() - 0.5) * 0.4;
-      this.speedY = (Math.random() - 0.5) * 0.4;
-      this.opacity = Math.random() * 0.5 + 0.1;
-      this.hue = Math.random() > 0.5 ? 245 : 190; // Purple or cyan
+    function initParticles() {
+      const count = Math.min(Math.floor((width * height) / 14000), 100);
+      particles = [];
+      for (let i = 0; i < count; i++) {
+        particles.push(new AuroraParticle());
+      }
     }
+    initParticles();
 
-    update() {
-      this.x += this.speedX;
-      this.y += this.speedY;
+    function drawMeshConnections() {
+      const maxDist = 125;
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
 
-      if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-      if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-    }
-
-    draw() {
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${this.hue}, 80%, 65%, ${this.opacity})`;
-      ctx.fill();
-    }
-  }
-
-  function initParticles() {
-    const count = Math.min(Math.floor((canvas.width * canvas.height) / 12000), 120);
-    particles = [];
-    for (let i = 0; i < count; i++) {
-      particles.push(new Particle());
-    }
-  }
-
-  function connectParticles() {
-    const maxDistance = 120;
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance < maxDistance) {
-          const opacity = (1 - distance / maxDistance) * 0.15;
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(108, 99, 255, ${opacity})`;
-          ctx.lineWidth = 0.5;
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.stroke();
+          if (dist < maxDist) {
+            const opacity = (1 - dist / maxDist) * 0.16;
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(0, 242, 254, ${opacity})`;
+            ctx.lineWidth = 0.6;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
         }
       }
     }
-  }
 
-  function animateParticles() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(p => {
-      p.update();
-      p.draw();
-    });
-    connectParticles();
-    animationFrameId = requestAnimationFrame(animateParticles);
-  }
-
-  resizeCanvas();
-  initParticles();
-  animateParticles();
-
-  let resizeTimeout;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-      resizeCanvas();
-      initParticles();
-    }, 250);
-  });
-
-
-  // ========== TYPING ANIMATION ==========
-  const typedElement = document.getElementById('typed-text');
-  const phrases = [
-    'Full-Stack Developer',
-    'Creative Coder',
-    'UI/UX Enthusiast',
-    'Problem Solver',
-    'Open Source Contributor'
-  ];
-  let phraseIndex = 0;
-  let charIndex = 0;
-  let isDeleting = false;
-  let typingSpeed = 80;
-
-  function typeText() {
-    const currentPhrase = phrases[phraseIndex];
-
-    if (isDeleting) {
-      typedElement.textContent = currentPhrase.substring(0, charIndex - 1);
-      charIndex--;
-      typingSpeed = 40;
-    } else {
-      typedElement.textContent = currentPhrase.substring(0, charIndex + 1);
-      charIndex++;
-      typingSpeed = 80;
+    function renderAurora() {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      drawMeshConnections();
+      requestAnimationFrame(renderAurora);
     }
-
-    if (!isDeleting && charIndex === currentPhrase.length) {
-      typingSpeed = 2000; // Pause at end
-      isDeleting = true;
-    } else if (isDeleting && charIndex === 0) {
-      isDeleting = false;
-      phraseIndex = (phraseIndex + 1) % phrases.length;
-      typingSpeed = 400; // Pause before next word
-    }
-
-    setTimeout(typeText, typingSpeed);
+    renderAurora();
   }
 
-  // Delay start to sync with fade-in animation
-  setTimeout(typeText, 1200);
+  // ========== 4. INTERACTIVE HERO DEV TERMINAL ==========
+  const terminalTabs = document.querySelectorAll('.terminal-tab');
+  const terminalContent = document.getElementById('terminal-content');
+  const terminalCopyBtn = document.getElementById('terminal-copy-btn');
 
+  const snippets = {
+    profile: `<code><span class="token-keyword">const</span> developer: <span class="token-property">Engineer</span> = {
+  <span class="token-property">name</span>: <span class="token-string">'Manoj M N'</span>,
+  <span class="token-property">role</span>: <span class="token-string">'Full-Stack Software Engineer'</span>,
+  <span class="token-property">specialties</span>: [
+    <span class="token-string">'High-Performance Frontends'</span>,
+    <span class="token-string">'Scalable REST & Auth Architectures'</span>,
+    <span class="token-string">'Interactive Systems & Generative AI'</span>
+  ],
+  <span class="token-property">philosophy</span>: <span class="token-string">'Crafting clean code with relentless UX care'</span>,
+  <span class="token-property">status</span>: <span class="token-string">'⚡ Shipping products that delight users'</span>
+};</code>`,
 
-  // ========== NAVBAR SCROLL EFFECT ==========
-  const navbar = document.getElementById('navbar');
-  let lastScroll = 0;
+    stack: `<code>{
+  <span class="token-property">"coreLanguages"</span>: [<span class="token-string">"TypeScript"</span>, <span class="token-string">"JavaScript (ES2026)"</span>, <span class="token-string">"SQL"</span>],
+  <span class="token-property">"frontendEcosystem"</span>: [<span class="token-string">"React 19"</span>, <span class="token-string">"Next.js"</span>, <span class="token-string">"Tailwind CSS"</span>, <span class="token-string">"Framer Motion"</span>],
+  <span class="token-property">"backendInfrastructure"</span>: [<span class="token-string">"Node.js"</span>, <span class="token-string">"Express"</span>, <span class="token-string">"Prisma ORM"</span>, <span class="token-string">"PostgreSQL"</span>],
+  <span class="token-property">"aiAndCloud"</span>: [<span class="token-string">"Google Cloud GenAI Studio"</span>, <span class="token-string">"Docker"</span>, <span class="token-string">"Vercel Edge"</span>]
+}</code>`,
 
-  function handleNavScroll() {
-    const currentScroll = window.scrollY;
-    if (currentScroll > 50) {
-      navbar.classList.add('scrolled');
-    } else {
-      navbar.classList.remove('scrolled');
-    }
-    lastScroll = currentScroll;
-  }
+    terminal: `<code><span class="token-comment"># Initializing Manoj M N Developer Environment...</span>
+<span class="token-keyword">$</span> npx manoj-mn --status
+<span class="token-string">✔ Systems Operational: Ready for deployment</span>
+<span class="token-string">✔ Location: India [Available Worldwide / Remote]</span>
+<span class="token-string">✔ Passion: Engineering elegant, robust web systems</span>
+<span class="token-keyword">$</span> echo <span class="token-string">"Let's build something extraordinary together."</span></code>`
+  };
 
-  window.addEventListener('scroll', handleNavScroll, { passive: true });
-
-
-  // ========== ACTIVE NAV LINK TRACKING ==========
-  const sections = document.querySelectorAll('section[id]');
-  const navLinks = document.querySelectorAll('.nav-links a[data-section]');
-
-  function updateActiveLink() {
-    const scrollPos = window.scrollY + 200;
-
-    sections.forEach(section => {
-      const sectionTop = section.offsetTop;
-      const sectionHeight = section.offsetHeight;
-      const sectionId = section.getAttribute('id');
-
-      if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
-        navLinks.forEach(link => {
-          link.classList.remove('active');
-          if (link.getAttribute('data-section') === sectionId) {
-            link.classList.add('active');
-          }
-        });
-      }
-    });
-  }
-
-  window.addEventListener('scroll', updateActiveLink, { passive: true });
-
-
-  // ========== MOBILE MENU ==========
-  const hamburger = document.getElementById('hamburger');
-  const mobileMenu = document.getElementById('mobile-menu');
-  const mobileOverlay = document.getElementById('mobile-overlay');
-  const mobileLinks = mobileMenu.querySelectorAll('a');
-
-  function toggleMobileMenu() {
-    hamburger.classList.toggle('active');
-    mobileMenu.classList.toggle('open');
-    mobileOverlay.classList.toggle('open');
-    document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
-  }
-
-  hamburger.addEventListener('click', toggleMobileMenu);
-  mobileOverlay.addEventListener('click', toggleMobileMenu);
-  mobileLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      if (mobileMenu.classList.contains('open')) {
-        toggleMobileMenu();
+  terminalTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      terminalTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const tabKey = tab.getAttribute('data-tab');
+      if (terminalContent && snippets[tabKey]) {
+        terminalContent.innerHTML = snippets[tabKey];
       }
     });
   });
 
-
-  // ========== SCROLL REVEAL ANIMATIONS ==========
-  const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
-
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('revealed');
-        revealObserver.unobserve(entry.target);
-      }
-    });
-  }, {
-    threshold: 0.15,
-    rootMargin: '0px 0px -50px 0px'
-  });
-
-  revealElements.forEach(el => revealObserver.observe(el));
-
-
-  // ========== SKILL BAR ANIMATION ==========
-  const skillBars = document.querySelectorAll('.skill-bar');
-
-  const skillObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const bar = entry.target;
-        const targetWidth = bar.getAttribute('data-width');
-        bar.style.width = targetWidth + '%';
-        bar.classList.add('animated');
-        skillObserver.unobserve(bar);
-      }
-    });
-  }, {
-    threshold: 0.5
-  });
-
-  skillBars.forEach(bar => skillObserver.observe(bar));
-
-
-  // ========== PROJECT FILTER ==========
-  const filterButtons = document.querySelectorAll('.filter-btn');
-  const projectCards = document.querySelectorAll('.project-card');
-
-  filterButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      // Update active button
-      filterButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const filter = btn.getAttribute('data-filter');
-
-      projectCards.forEach((card, index) => {
-        const category = card.getAttribute('data-category');
-        const shouldShow = filter === 'all' || category === filter;
-
-        // Animate out
-        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        card.style.opacity = '0';
-        card.style.transform = 'scale(0.95)';
-
-        setTimeout(() => {
-          card.style.display = shouldShow ? 'block' : 'none';
-          if (shouldShow) {
-            // Stagger fade in
-            setTimeout(() => {
-              card.style.opacity = '1';
-              card.style.transform = 'scale(1)';
-            }, index * 80);
-          }
-        }, 300);
+  if (terminalCopyBtn && terminalContent) {
+    terminalCopyBtn.addEventListener('click', () => {
+      const textToCopy = terminalContent.innerText;
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast('Code copied to clipboard! 📋');
       });
     });
-  });
+  }
 
-
-  // ========== SMOOTH SCROLL FOR NAV LINKS ==========
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        const navHeight = navbar.offsetHeight;
-        const targetPosition = target.offsetTop - navHeight;
-        window.scrollTo({
-          top: targetPosition,
-          behavior: 'smooth'
-        });
-      }
+  // ========== 5. SPOTLIGHT CARDS EFFECT ==========
+  const spotlightCards = document.querySelectorAll('.spotlight-card, .bento-card');
+  spotlightCards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.setProperty('--mouse-x', `${x}px`);
+      card.style.setProperty('--mouse-y', `${y}px`);
     });
   });
 
-
-  // ========== CONTACT FORM ==========
-  const contactForm = document.getElementById('contact-form');
-
-  contactForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const submitBtn = contactForm.querySelector('.btn-submit');
-    const originalText = submitBtn.innerHTML;
-
-    // Show loading state
-    submitBtn.innerHTML = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-      Sending...
-    `;
-    submitBtn.disabled = true;
-
-    const formData = new FormData(contactForm);
-    const data = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      message: formData.get('message'),
-      _subject: `New Portfolio Message from ${formData.get('name')}`,
-      _captcha: 'false'
-    };
-
-    try {
-      const response = await fetch('https://formsubmit.co/ajax/manojmn1218@gmail.com', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-
-      const result = await response.json();
-
-      if (response.ok && (result.success === "true" || result.success === true)) {
-        submitBtn.innerHTML = `
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          Message Sent!
-        `;
-        submitBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
-        contactForm.reset();
-      } else if (result.message && result.message.includes('Activation')) {
-        submitBtn.innerHTML = `Check your email to activate!`;
-        submitBtn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-      } else {
-        throw new Error(result.message || 'Form response not ok');
-      }
-    } catch (err) {
-      submitBtn.innerHTML = `Failed to send. Try again!`;
-      submitBtn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
-    } finally {
-      setTimeout(() => {
-        submitBtn.innerHTML = originalText;
-        submitBtn.style.background = '';
-        submitBtn.disabled = false;
-      }, 3500);
-    }
-  });
-
-
-  // ========== MAGNETIC HOVER EFFECT ON CARDS ==========
-  const hoverCards = document.querySelectorAll('.project-card, .cert-card, .other-cert-card');
-  hoverCards.forEach(card => {
+  // ========== 6. 3D HOLOGRAPHIC TILT ON CREDENTIAL CARDS ==========
+  const holoCards = document.querySelectorAll('.holo-cert-card');
+  holoCards.forEach(card => {
     card.addEventListener('mousemove', (e) => {
       const rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
-      const rotateX = (y - centerY) / 20;
-      const rotateY = (centerX - x) / 20;
+      const rotateX = ((y - centerY) / centerY) * -10;
+      const rotateY = ((x - centerX) / centerX) * 10;
 
       card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+      card.style.setProperty('--mouse-x', `${x}px`);
+      card.style.setProperty('--mouse-y', `${y}px`);
     });
 
     card.addEventListener('mouseleave', () => {
-      card.style.transform = '';
-      card.style.transition = 'transform 0.5s ease';
+      card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
+    });
+  });
+
+  // ========== 7. ANIMATED METRIC COUNTERS (BENTO GRID) ==========
+  const counters = document.querySelectorAll('.counter');
+  let countersTriggered = false;
+
+  function animateCounters() {
+    counters.forEach(counter => {
+      const target = parseInt(counter.getAttribute('data-target'), 10);
+      let count = 0;
+      const duration = 1600;
+      const stepTime = Math.abs(Math.floor(duration / target));
+
+      const timer = setInterval(() => {
+        count += 1;
+        counter.textContent = count + '+';
+        if (count >= target) {
+          clearInterval(timer);
+          counter.textContent = target + '+';
+        }
+      }, Math.max(stepTime, 40));
+    });
+  }
+
+  const statsSection = document.querySelector('.bento-stats');
+  if (statsSection) {
+    const statsObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !countersTriggered) {
+          countersTriggered = true;
+          animateCounters();
+        }
+      });
+    }, { threshold: 0.4 });
+    statsObserver.observe(statsSection);
+  }
+
+  // ========== 8. PROJECTS CATEGORY FILTERING ==========
+  const projectFilters = document.querySelectorAll('.filter-pill[data-filter]');
+  const projectCards = document.querySelectorAll('.spotlight-card[data-category]');
+
+  projectFilters.forEach(pill => {
+    pill.addEventListener('click', () => {
+      projectFilters.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+
+      const filter = pill.getAttribute('data-filter');
+      projectCards.forEach(card => {
+        const category = card.getAttribute('data-category');
+        if (filter === 'all' || category === filter) {
+          card.style.display = 'flex';
+          setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          }, 50);
+        } else {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+          setTimeout(() => {
+            card.style.display = 'none';
+          }, 300);
+        }
+      });
+    });
+  });
+
+  // ========== 9. TECH MATRIX FILTERING ==========
+  const skillFilters = document.querySelectorAll('.filter-pill[data-skill-filter]');
+  const skillItems = document.querySelectorAll('.skill-matrix-item[data-category]');
+
+  skillFilters.forEach(pill => {
+    pill.addEventListener('click', () => {
+      skillFilters.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+
+      const filter = pill.getAttribute('data-skill-filter');
+      skillItems.forEach(item => {
+        const category = item.getAttribute('data-category');
+        if (filter === 'all' || category === filter) {
+          item.style.display = 'flex';
+          setTimeout(() => {
+            item.style.opacity = '1';
+            item.style.transform = 'translateY(0)';
+          }, 40);
+        } else {
+          item.style.opacity = '0';
+          item.style.transform = 'translateY(15px)';
+          setTimeout(() => {
+            item.style.display = 'none';
+          }, 250);
+        }
+      });
+    });
+  });
+
+  // ========== 10. LIGHTBOX MODAL CONTROLLER ==========
+  const lightboxModal = document.getElementById('lightbox-modal');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const lightboxTitle = document.getElementById('lightbox-title');
+  const lightboxClose = document.getElementById('lightbox-close');
+  const certPreviews = document.querySelectorAll('.holo-cert-preview[data-lightbox-src]');
+
+  function openLightbox(src, title) {
+    if (lightboxImg && lightboxModal && lightboxTitle) {
+      lightboxImg.src = src;
+      lightboxTitle.textContent = title || 'Credential Preview';
+      lightboxModal.classList.add('active');
+      lightboxModal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeLightbox() {
+    if (lightboxModal) {
+      lightboxModal.classList.remove('active');
+      lightboxModal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      if (lightboxImg) lightboxImg.src = '';
+    }
+  }
+
+  certPreviews.forEach(preview => {
+    preview.addEventListener('click', () => {
+      const src = preview.getAttribute('data-lightbox-src');
+      const title = preview.getAttribute('data-lightbox-title');
+      openLightbox(src, title);
+    });
+  });
+
+  if (lightboxClose) {
+    lightboxClose.addEventListener('click', closeLightbox);
+  }
+
+  if (lightboxModal) {
+    lightboxModal.addEventListener('click', (e) => {
+      if (e.target === lightboxModal) {
+        closeLightbox();
+      }
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lightboxModal && lightboxModal.classList.contains('active')) {
+      closeLightbox();
+    }
+  });
+
+  // ========== 11. 1-CLICK EMAIL COPY & TOAST NOTIFICATION ==========
+  const copyEmailBtn = document.getElementById('copy-email-btn');
+  const toastNotice = document.getElementById('toast-notice');
+  const toastMessage = document.getElementById('toast-message');
+  let toastTimer = null;
+
+  function showToast(msg) {
+    if (!toastNotice) return;
+    if (toastMessage) toastMessage.textContent = msg;
+    toastNotice.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toastNotice.classList.remove('show');
+    }, 2800);
+  }
+
+  if (copyEmailBtn) {
+    copyEmailBtn.addEventListener('click', () => {
+      const email = copyEmailBtn.getAttribute('data-email') || 'manojmn1218@gmail.com';
+      navigator.clipboard.writeText(email).then(() => {
+        copyEmailBtn.textContent = 'Copied! ✨';
+        showToast('Email copied to clipboard! 📋');
+        setTimeout(() => {
+          copyEmailBtn.textContent = 'Copy';
+        }, 2200);
+      });
+    });
+  }
+
+  // ========== 12. CONTACT FORM SUBMISSION SIMULATION ==========
+  const contactForm = document.getElementById('contact-form');
+  const submitBtn = document.getElementById('submit-btn');
+
+  if (contactForm && submitBtn) {
+    contactForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const originalText = submitBtn.innerHTML;
+
+      submitBtn.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
+        <span>Dispatching...</span>
+      `;
+      submitBtn.disabled = true;
+
       setTimeout(() => {
-        card.style.transition = '';
-      }, 500);
+        submitBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Dispatched Successfully!</span>
+        `;
+        showToast('Message sent! I will respond promptly. 🚀');
+        contactForm.reset();
+
+        setTimeout(() => {
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+        }, 3000);
+      }, 1200);
     });
+  }
+
+  // Add keyframe for spin if not already present
+  const style = document.createElement('style');
+  style.textContent = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
+  document.head.appendChild(style);
+
+  // ========== 13. INTERSECTION OBSERVER FOR SCROLL REVEAL ==========
+  const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+  const revealObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -40px 0px'
   });
 
-
-  // ========== FORM INPUT FOCUS EFFECTS ==========
-  const formInputs = document.querySelectorAll('.form-group input, .form-group textarea');
-
-  formInputs.forEach(input => {
-    input.addEventListener('focus', () => {
-      input.parentElement.querySelector('label').style.color = '#6c63ff';
-    });
-
-    input.addEventListener('blur', () => {
-      input.parentElement.querySelector('label').style.color = '';
-    });
-  });
+  revealElements.forEach(el => revealObserver.observe(el));
 
 });
-
-// Add spin animation for loading state
-const style = document.createElement('style');
-style.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
-document.head.appendChild(style);
