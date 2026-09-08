@@ -1251,7 +1251,7 @@ button {
 
 /* ---------- CERTIFICATIONS: HOLOGRAPHIC CREDENTIAL VAULT ---------- */
 .certificates {
-  padding: var(--section-padding);
+  padding: clamp(3.5rem, 6vw, 5rem) clamp(1.5rem, 5vw, 5rem);
   position: relative;
   z-index: 1;
 }
@@ -1263,9 +1263,10 @@ button {
 
 .certs-vault-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 2rem;
-  max-width: 900px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 340px));
+  justify-content: center;
+  gap: 1.5rem;
+  max-width: 740px;
   margin: 0 auto;
 }
 
@@ -1273,7 +1274,7 @@ button {
 .holo-cert-card {
   background: var(--bg-glass-card);
   border: 1px solid var(--border-medium);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   overflow: hidden;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -1282,6 +1283,9 @@ button {
   transform-style: preserve-3d;
   display: flex;
   flex-direction: column;
+  max-width: 350px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 /* Holographic Shimmer Foil Overlay */
@@ -1311,12 +1315,12 @@ button {
 
 .holo-cert-card:hover {
   border-color: rgba(0, 242, 254, 0.4);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 242, 254, 0.15);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 242, 254, 0.12);
 }
 
 .holo-cert-preview {
   position: relative;
-  aspect-ratio: 16 / 11;
+  aspect-ratio: 16 / 10;
   overflow: hidden;
   background: #0d0f19;
   cursor: pointer;
@@ -1353,16 +1357,16 @@ button {
 .btn-lightbox-preview {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 0.65rem 1.4rem;
+  gap: 6px;
+  padding: 0.5rem 1.15rem;
   background: var(--cyan);
   color: #060609;
   border-radius: var(--radius-pill);
   font-family: var(--font-heading);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  box-shadow: 0 0 20px var(--cyan-glow);
-  transform: translateY(6px);
+  box-shadow: 0 0 16px var(--cyan-glow);
+  transform: translateY(4px);
   transition: all var(--transition-fast);
 }
 
@@ -1371,12 +1375,12 @@ button {
 }
 
 .btn-lightbox-preview svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
 }
 
 .holo-cert-info {
-  padding: 1.5rem;
+  padding: 1.15rem 1.25rem;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -1386,37 +1390,37 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .holo-issuer {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--cyan);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
 }
 
 .holo-verified-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--mint);
   background: rgba(0, 245, 160, 0.1);
-  padding: 2px 7px;
+  padding: 1px 6px;
   border-radius: var(--radius-pill);
 }
 
 .holo-cert-title {
   font-family: var(--font-heading);
-  font-size: 1.25rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: #fff;
-  margin-bottom: 1rem;
-  line-height: 1.3;
+  margin-bottom: 0.8rem;
+  line-height: 1.35;
 }
 
 .holo-cert-footer {
@@ -1424,9 +1428,9 @@ button {
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid var(--border-subtle);
-  padding-top: 1rem;
+  padding-top: 0.75rem;
   margin-top: auto;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: #8b949e;
 }
 
