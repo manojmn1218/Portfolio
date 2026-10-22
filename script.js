@@ -204,26 +204,26 @@ document.addEventListener('DOMContentLoaded', () => {
   <span class="token-property">name</span>: <span class="token-string">'Manoj M N'</span>,
   <span class="token-property">role</span>: <span class="token-string">'Full-Stack Software Engineer'</span>,
   <span class="token-property">specialties</span>: [
-    <span class="token-string">'High-Performance Frontends'</span>,
-    <span class="token-string">'Scalable REST & Auth Architectures'</span>,
-    <span class="token-string">'Interactive Systems & Generative AI'</span>
+    <span class="token-string">'React 19 & TypeScript Frontend'</span>,
+    <span class="token-string">'Node.js, Express & Prisma Backend'</span>,
+    <span class="token-string">'PostgreSQL & RESTful API Architecture'</span>
   ],
-  <span class="token-property">philosophy</span>: <span class="token-string">'Crafting clean code with relentless UX care'</span>,
-  <span class="token-property">status</span>: <span class="token-string">'⚡ Shipping products that delight users'</span>
+  <span class="token-property">philosophy</span>: <span class="token-string">'Turning ideas into elegant, functional solutions'</span>,
+  <span class="token-property">status</span>: <span class="token-string">'🚀 Shipping clean code & building great products'</span>
 };</code>`,
 
     stack: `<code>{
-  <span class="token-property">"coreLanguages"</span>: [<span class="token-string">"TypeScript"</span>, <span class="token-string">"JavaScript (ES2026)"</span>, <span class="token-string">"SQL"</span>],
-  <span class="token-property">"frontendEcosystem"</span>: [<span class="token-string">"React 19"</span>, <span class="token-string">"Next.js"</span>, <span class="token-string">"Tailwind CSS"</span>, <span class="token-string">"Framer Motion"</span>],
-  <span class="token-property">"backendInfrastructure"</span>: [<span class="token-string">"Node.js"</span>, <span class="token-string">"Express"</span>, <span class="token-string">"Prisma ORM"</span>, <span class="token-string">"PostgreSQL"</span>],
-  <span class="token-property">"aiAndCloud"</span>: [<span class="token-string">"Google Cloud GenAI Studio"</span>, <span class="token-string">"Docker"</span>, <span class="token-string">"Vercel Edge"</span>]
+  <span class="token-property">"coreLanguages"</span>: [<span class="token-string">"TypeScript"</span>, <span class="token-string">"JavaScript"</span>, <span class="token-string">"HTML5/CSS3"</span>],
+  <span class="token-property">"frontend"</span>: [<span class="token-string">"React 19"</span>, <span class="token-string">"Tailwind CSS"</span>, <span class="token-string">"Framer Motion"</span>, <span class="token-string">"Recharts"</span>],
+  <span class="token-property">"backendAndDatabase"</span>: [<span class="token-string">"Node.js"</span>, <span class="token-string">"Express"</span>, <span class="token-string">"PostgreSQL"</span>, <span class="token-string">"Prisma ORM"</span>, <span class="token-string">"MongoDB"</span>],
+  <span class="token-property">"certifications"</span>: [<span class="token-string">"HP LIFE Data Science"</span>, <span class="token-string">"Simplilearn Generative AI Studio"</span>]
 }</code>`,
 
-    terminal: `<code><span class="token-comment"># Initializing Manoj M N Developer Environment...</span>
-<span class="token-keyword">$</span> npx manoj-mn --status
-<span class="token-string">✔ Systems Operational: Ready for deployment</span>
-<span class="token-string">✔ Location: India [Available Worldwide / Remote]</span>
-<span class="token-string">✔ Passion: Engineering elegant, robust web systems</span>
+    terminal: `<code><span class="token-comment"># Manoj M N — Full-Stack Developer Environment</span>
+<span class="token-keyword">$</span> git status
+<span class="token-string">✔ On branch main: All systems ready for deployment</span>
+<span class="token-keyword">$</span> npm run dev
+<span class="token-string">✔ Server running at http://localhost:3000</span>
 <span class="token-keyword">$</span> echo <span class="token-string">"Let's build something extraordinary together."</span></code>`
   };
 
@@ -455,34 +455,64 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ========== 12. CONTACT FORM SUBMISSION SIMULATION ==========
+  // ========== 12. REAL CONTACT FORM SUBMISSION (FORMSUBMIT API) ==========
   const contactForm = document.getElementById('contact-form');
   const submitBtn = document.getElementById('submit-btn');
 
   if (contactForm && submitBtn) {
-    contactForm.addEventListener('submit', (e) => {
+    contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const originalText = submitBtn.innerHTML;
 
       submitBtn.innerHTML = `
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
-        <span>Dispatching...</span>
+        <span>Sending...</span>
       `;
       submitBtn.disabled = true;
 
-      setTimeout(() => {
-        submitBtn.innerHTML = `
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Dispatched Successfully!</span>
-        `;
-        showToast('Message sent! I will respond promptly. 🚀');
-        contactForm.reset();
+      const formData = new FormData(contactForm);
+      const data = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        message: formData.get('message'),
+        _subject: `New Portfolio Message from ${formData.get('name')}`,
+        _captcha: 'false'
+      };
 
+      try {
+        const response = await fetch('https://formsubmit.co/ajax/manojmn1218@gmail.com', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok && (result.success === "true" || result.success === true)) {
+          submitBtn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Message Sent!</span>
+          `;
+          showToast('Message sent! I will respond promptly. 🚀');
+          contactForm.reset();
+        } else if (result.message && result.message.includes('Activation')) {
+          submitBtn.innerHTML = `<span>Check email to activate!</span>`;
+          showToast('FormSubmit: check email to confirm activation!');
+        } else {
+          throw new Error(result.message || 'Submission failed');
+        }
+      } catch (err) {
+        submitBtn.innerHTML = `<span>Failed to send. Try again!</span>`;
+        showToast('Failed to send message. Please email directly.');
+      } finally {
         setTimeout(() => {
           submitBtn.innerHTML = originalText;
           submitBtn.disabled = false;
-        }, 3000);
-      }, 1200);
+        }, 3500);
+      }
     });
   }
 
